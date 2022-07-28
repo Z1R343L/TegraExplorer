@@ -36,17 +36,11 @@ class Code:
 
 
 def isidentifier(s: str):
-    for c in s:
-        if c not in (ascii_letters + '_' + digits):
-            return False
-    return True
+    return all(c in f'{ascii_letters}_{digits}' for c in s)
 
 
 def iswhitespace(s: str):
-    for c in s:
-        if c not in (' ', '\t', '\n'):
-            return False
-    return True
+    return all(c in (' ', '\t', '\n') for c in s)
 
 
 def hascomment(s: str):
@@ -91,18 +85,16 @@ def parser(script: str):
     hexxed = False
     ismember = False
     quoted = False
-    strscript = script.rawcode + ' '
+    strscript = f'{script.rawcode} '
     # the space will get removed after the second pass of whitespacent, but for now it prevents not detecting the
     # last identifier in a script (eg if script.rawcode was "a=12" the 12 wouldn't be detected without the trailing ' ')
     start = len(strscript) + 1
     for ch in range(len(strscript)):
         if (strscript[ch - 1] == '0' and strscript[ch] == 'x') and not quoted:
             hexxed = True
-        elif isidentifier(strscript[ch]) and not (hexxed or quoted):
+        elif isidentifier(strscript[ch]) and not hexxed and not quoted:
             if start > ch:
                 start = ch
-            else:
-                pass
         elif hexxed and strscript[ch] not in hexdigits:
             hexxed = False
         elif strscript[ch] == '"':
@@ -131,7 +123,7 @@ def parser(script: str):
                 ismember = True
             elif strscript[ch] == '(':
                 if ismember:
-                    if "foreach" == strscript[start:ch]:  # array.foreach takes a variable name as an arg (blame meme)
+                    if strscript[start:ch] == "foreach":
                         for i, string in enumerate(script.strings):
                             if string[0] == ch + (script.comments[-1][1] if script.comments else 0) + 1:
                                 script.varstrs.append(string)
@@ -139,7 +131,6 @@ def parser(script: str):
                                 break
                     else:
                         ismember = False
-                        pass
             elif strscript[ch] in ')}]':
                 ismember = strscript[ch + 1] == '.'
             start = len(strscript) + 1

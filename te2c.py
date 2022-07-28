@@ -50,8 +50,8 @@ def map_scripts_from(path: str, suffix: str=".te") -> Dict[str, Dict[str, str]]:
 
 def te2c(dest: str, path: str, suffix: str=".te"):
     script_map = map_scripts_from(path, suffix=suffix)
-    with open(dest + ".c", "w") as fp:
-        fp.write(SOURCE_HEADER.format(os.path.basename(dest) + ".h"))
+    with open(f"{dest}.c", "w") as fp:
+        fp.write(SOURCE_HEADER.format(f"{os.path.basename(dest)}.h"))
         fp.write(
             "const embedded_script_t embedded_scripts_g[] = {{\n{}}};\n".format(
                 str().join(
@@ -60,7 +60,7 @@ def te2c(dest: str, path: str, suffix: str=".te"):
             )
         )
 
-    with open(dest + ".h", "w") as fp:
+    with open(f"{dest}.h", "w") as fp:
         fp.write(HEADER_DEF.format(len(script_map)))
 
 if __name__ == "__main__":
